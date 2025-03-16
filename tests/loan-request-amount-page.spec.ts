@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { PageIndex } from "../page-objects/PageIndex";
 import loanRequirementsDropdownData from "../test-data/loan-requirements-data.json";
 
-test.describe("Loan Request Amount page tests", () => {
+test.describe("Loan Request Amount page functional tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/en/nl/request-loan/amount");
   });
@@ -131,7 +131,6 @@ test.describe("Loan Request Amount page tests", () => {
   }) => {
     const pageObject = new PageIndex(page);
 
-    // TODO: Make dynamic data not a hard coded like this
     const loanRequirementsData = await pageObject
       .data()
       .generateLoanRequirementsData(loanRequirementsDropdownData);
@@ -153,7 +152,6 @@ test.describe("Loan Request Amount page tests", () => {
   test("Should be able to go back to the previous page", async ({ page }) => {
     const pageObject = new PageIndex(page);
 
-    // TODO: Make dynamic data not a hard coded like this
     const loanRequirementsData = await pageObject
       .data()
       .generateLoanRequirementsData(loanRequirementsDropdownData);
@@ -177,7 +175,6 @@ test.describe("Loan Request Amount page tests", () => {
   test("Should retain informations when page refreshes.", async ({ page }) => {
     const pageObject = new PageIndex(page);
 
-    // TODO: Make dynamic data not a hard coded like this
     const loanRequirementsData = await pageObject
       .data()
       .generateLoanRequirementsData(loanRequirementsDropdownData);
