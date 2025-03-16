@@ -160,6 +160,7 @@ test.describe("Loan Request Amount page tests", () => {
   }) => {
     const pageObject = new PageIndex(page);
 
+    // TODO: Make dynamic data not a hard coded like this
     const loanRequirementsData = {
       loanAmount: "12000",
       dropdowns: [
@@ -171,7 +172,7 @@ test.describe("Loan Request Amount page tests", () => {
     };
 
     await pageObject.amount().completeAmountForm(loanRequirementsData);
-    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
+    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData); // TODO: to be Reconsider
 
     // Validate next button to be clickable
     await expect(pageObject.amount().getNextButton()).toBeEnabled();
@@ -186,12 +187,10 @@ test.describe("Loan Request Amount page tests", () => {
     expect(currentUrl).toContain("contact");
   });
 
-  // TODO: WOrk in progress
-  test.skip("Should be able to go back to the previous page", async ({
-    page,
-  }) => {
+  test("Should be able to go back to the previous page", async ({ page }) => {
     const pageObject = new PageIndex(page);
 
+    // TODO: Make dynamic data not a hard coded like this
     const loanRequirementsData = {
       loanAmount: "12000",
       dropdowns: [
@@ -211,34 +210,37 @@ test.describe("Loan Request Amount page tests", () => {
 
     const oldUrl = page.url();
 
-    console.log("old url: ", oldUrl);
-
     await page.locator('a[href="/en/nl/request-loan/amount"]').first().click(); // TODO: Fix selector as it could be nl instead of en - Move to page-object
 
     const newUrl = page.url();
     expect(newUrl).toContain("amount");
-    // expect(oldUrl).not.toBe(oldUrl);
+    expect(oldUrl).not.toBe(newUrl);
 
-    // await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
+    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
+  });
 
-    for (const expectedLoanData of loanRequirementsData.dropdowns) {
-      await pageObject
-        .amount()
-        .validateDropdownSelectedOption(
-          expectedLoanData.field,
-          expectedLoanData.value
-        );
-    }
+  test("Should retain informations when page refreshes.", async ({ page }) => {
+    const pageObject = new PageIndex(page);
 
-    /**
-     * Pseudo code
-     * 1. Complete amount form - DONE
-     * 2. Click Next button - DONE
-     * 3. Grab the url in a variable: oldUrl - DONE
-     * 4. Validate Previous button: Should be enabled - maybe out of scope
-     * 5. Validate all data in amount page - DONE
-     * 6. Validate amount url: .toContain('amount') - DONE
-     * 7. Validate old url vs new url: expect(oldUrl).not.toBe(newUrl) - DONE
-     */
+    // TODO: Make dynamic data not a hard coded like this
+    const loanRequirementsData = {
+      loanAmount: "12000",
+      dropdowns: [
+        { field: "loanPeriods", value: "Fixed rate loan" },
+        { field: "companyRevenue", value: "€150.000 - €500.000" },
+        { field: "loanDeadline", value: "Within a week" },
+        { field: "loanGoal", value: "Equity" },
+      ],
+    };
+
+    await pageObject.amount().completeAmountForm(loanRequirementsData);
+
+    await page.reload();
+
+    await page.waitForResponse(
+      "https://region1.google-analytics.com/g/collect?*"
+    );
+
+    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
   });
 });

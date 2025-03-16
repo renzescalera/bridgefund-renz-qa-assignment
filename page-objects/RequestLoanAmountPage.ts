@@ -24,26 +24,19 @@ export class AmountPage {
     return this.page.locator("gr-button.button-primary");
   }
 
-  async selectDropdownOption(dropdownType: string, selectedOption: string) {
-    let dropdownIndex: number;
+  private getDropdownIndex(dropdownType: string): number {
+    const dropdownMap: Record<string, number> = {
+      loanPeriods: 1,
+      companyRevenue: 2,
+      loanDeadline: 3,
+      loanGoal: 4,
+    };
 
-    // TODO: Use object instead - need to optimize
-    switch (dropdownType) {
-      case "loanPeriods":
-        dropdownIndex = 1;
-        break;
-      case "companyRevenue":
-        dropdownIndex = 2;
-        break;
-      case "loanDeadline":
-        dropdownIndex = 3;
-        break;
-      case "loanGoal":
-        dropdownIndex = 4;
-        break;
-      default:
-        dropdownIndex = 0; // Default value if no match
-    }
+    return dropdownMap[dropdownType] ?? 0;
+  }
+
+  async selectDropdownOption(dropdownType: string, selectedOption: string) {
+    const dropdownIndex = this.getDropdownIndex(dropdownType);
 
     const dropdown = this.page
       .locator(`gr-select[name="${dropdownType}"]`)
@@ -62,26 +55,7 @@ export class AmountPage {
     dropdownType: string,
     expectedOption: string
   ) {
-    let dropdownIndex: number;
-
-    // TODO: Use object instead - need to optimize
-    // Similar from dropdown option, might be useful to separate the repated codes
-    switch (dropdownType) {
-      case "loanPeriods":
-        dropdownIndex = 1;
-        break;
-      case "companyRevenue":
-        dropdownIndex = 2;
-        break;
-      case "loanDeadline":
-        dropdownIndex = 3;
-        break;
-      case "loanGoal":
-        dropdownIndex = 4;
-        break;
-      default:
-        dropdownIndex = 0; // Default value if no match
-    }
+    const dropdownIndex = this.getDropdownIndex(dropdownType);
 
     const dropdownLocator = this.page
       .locator(`gr-select[name="${dropdownType}"]`)
@@ -109,14 +83,22 @@ export class AmountPage {
   async validateCompletedAmountForm(expectedAmountFormDataObject) {
     const { loanAmount, dropdowns } = expectedAmountFormDataObject;
 
-    // const inputValue = await this.getAmountField().inputValue();
-    // expect(inputValue).toBe(loanAmount); // TODO: Fix the number separator - consider the (,) for EN and (.) for NL
+    const isEnUsedAsLanguage = this.page.url().includes("/en/");
+    const formattedAmount = new Intl.NumberFormat(
+      isEnUsedAsLanguage ? "en-US" : "nl-NL"
+    ).format(loanAmount);
 
-    for (const expectedLoanData of dropdowns) {
-      await this.validateDropdownSelectedOption(
-        expectedLoanData.field,
-        expectedLoanData.value
-      );
+    const inputValue = await this.getAmountField().inputValue();
+    expect(inputValue).toBe(formattedAmount);
+
+    for (const loanData of dropdowns) {
+      const dropdownOption = await this.page
+        .locator(`gr-select[name="${loanData.field}"]`)
+        .evaluate((el) =>
+          el.shadowRoot?.querySelector("div.select-label")?.textContent?.trim()
+        );
+
+      expect(dropdownOption).toBe(loanData.value);
     }
   }
 }
