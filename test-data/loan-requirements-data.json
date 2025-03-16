@@ -1,0 +1,37 @@
+{
+  "loanPeriodDropdown": {
+    "field": "loanPeriods",
+    "options": ["Fixed rate loan", "Withdraw in installments", "No preference"]
+  },
+  "annualTurnoverDropdown": {
+    "field": "companyRevenue",
+    "options": [
+      "Less than €25.000",
+      "€25.000 - €50.000",
+      "€50.000 - €150.000",
+      "€150.000 - €500.000",
+      "€500.000 - €1.000.000",
+      "More than €1.000.000"
+    ]
+  },
+  "loanDeadlineDropdown": {
+    "field": "loanDeadline",
+    "options": ["Today", "Within a week", "No rush", "Just browsing"]
+  },
+  "loanGoalDropdown": {
+    "field": "loanGoal",
+    "options": [
+      "Debtor",
+      "Stock",
+      "Inventory",
+      "Machinery",
+      "Marketing",
+      "Vehicles",
+      "Renovation",
+      "Prefunding",
+      "Equity",
+      "Refinancing",
+      "Other"
+    ]
+  }
+}

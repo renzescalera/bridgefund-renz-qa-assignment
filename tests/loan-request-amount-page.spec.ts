@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { PageIndex } from "../page-objects/PageIndex";
+import loanRequirementsDropdownData from "../test-data/loan-requirements-data.json";
 
 test.describe("Loan Request Amount page tests", () => {
   test.beforeEach(async ({ page }) => {
@@ -35,26 +36,7 @@ test.describe("Loan Request Amount page tests", () => {
       .getAmountField()
       .inputValue();
 
-    const amountSlider = page.locator('input[type="range"]');
-    await amountSlider.waitFor({ state: "visible" });
-
-    const boundingBox = await amountSlider.boundingBox();
-    if (!boundingBox) {
-      throw new Error("Slider not found!");
-    }
-
-    const { x, y, width, height } = boundingBox;
-    const sliderY = y + height / 2;
-
-    const startX = x + 5;
-    const endX = x + width - 10;
-
-    await page.mouse.move(startX, sliderY);
-    await page.mouse.down();
-    await page.mouse.move(endX, sliderY, { steps: 10 });
-    await page.mouse.up();
-
-    await pageObject.amount().getAmountField().waitFor({ state: "visible" });
+    await pageObject.amount().moveSliderToMax();
 
     const updatedValue = await pageObject
       .amount()
@@ -150,15 +132,9 @@ test.describe("Loan Request Amount page tests", () => {
     const pageObject = new PageIndex(page);
 
     // TODO: Make dynamic data not a hard coded like this
-    const loanRequirementsData = {
-      loanAmount: "12000",
-      dropdowns: [
-        { field: "loanPeriods", value: "Fixed rate loan" },
-        { field: "companyRevenue", value: "€150.000 - €500.000" },
-        { field: "loanDeadline", value: "Within a week" },
-        { field: "loanGoal", value: "Equity" },
-      ],
-    };
+    const loanRequirementsData = await pageObject
+      .data()
+      .generateLoanRequirementsData(loanRequirementsDropdownData);
 
     await pageObject.amount().completeAmountForm(loanRequirementsData);
     await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
@@ -178,15 +154,9 @@ test.describe("Loan Request Amount page tests", () => {
     const pageObject = new PageIndex(page);
 
     // TODO: Make dynamic data not a hard coded like this
-    const loanRequirementsData = {
-      loanAmount: "12000",
-      dropdowns: [
-        { field: "loanPeriods", value: "Fixed rate loan" },
-        { field: "companyRevenue", value: "€150.000 - €500.000" },
-        { field: "loanDeadline", value: "Within a week" },
-        { field: "loanGoal", value: "Equity" },
-      ],
-    };
+    const loanRequirementsData = await pageObject
+      .data()
+      .generateLoanRequirementsData(loanRequirementsDropdownData);
 
     await pageObject.amount().completeAmountForm(loanRequirementsData);
     await pageObject.amount().getNextButton().click();
@@ -208,15 +178,9 @@ test.describe("Loan Request Amount page tests", () => {
     const pageObject = new PageIndex(page);
 
     // TODO: Make dynamic data not a hard coded like this
-    const loanRequirementsData = {
-      loanAmount: "12000",
-      dropdowns: [
-        { field: "loanPeriods", value: "Fixed rate loan" },
-        { field: "companyRevenue", value: "€150.000 - €500.000" },
-        { field: "loanDeadline", value: "Within a week" },
-        { field: "loanGoal", value: "Equity" },
-      ],
-    };
+    const loanRequirementsData = await pageObject
+      .data()
+      .generateLoanRequirementsData(loanRequirementsDropdownData);
 
     await pageObject.amount().completeAmountForm(loanRequirementsData);
 
@@ -226,4 +190,12 @@ test.describe("Loan Request Amount page tests", () => {
 
     await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
   });
+
+  // TODO: WIP
+  // TODO: Also apply here the Visual Regression Testing – Capture snapshots for UI comparison.
+  // test.skip("Should adapt to page layout changes across different screen size", async ({
+  //   page,
+  // }) => {
+  //   const pageObject = new PageIndex(page);
+  // });
 });

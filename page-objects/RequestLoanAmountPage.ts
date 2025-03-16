@@ -1,23 +1,37 @@
-import { Page, Locator, expect } from "@playwright/test";
+import { Page, expect } from "@playwright/test";
 
 export class AmountPage {
   private readonly page: Page;
-  //   private readonly amountField: Locator;
-  //   private readonly nextButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    // this.amountField = page.locator('[inputmode="numeric"]');
   }
 
   getAmountField() {
     return this.page.locator('[inputmode="numeric"]');
   }
 
-  getLoanTypeDropdown() {
-    return this.page
-      .locator('gr-select[name="loanPeriods"]')
-      .locator("gr-dropdown#dropdown-1");
+  async moveSliderToMax() {
+    const amountSlider = this.page.locator('input[type="range"]');
+    await amountSlider.waitFor({ state: "visible" });
+
+    const boundingBox = await amountSlider.boundingBox();
+    if (!boundingBox) {
+      throw new Error("Slider not found!");
+    }
+
+    const { x, y, width, height } = boundingBox;
+    const sliderY = y + height / 2;
+
+    const startX = x + 5;
+    const endX = x + width - 10;
+
+    await this.page.mouse.move(startX, sliderY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(endX, sliderY, { steps: 10 });
+    await this.page.mouse.up();
+
+    await this.getAmountField().waitFor({ state: "visible" });
   }
 
   getNextButton() {
