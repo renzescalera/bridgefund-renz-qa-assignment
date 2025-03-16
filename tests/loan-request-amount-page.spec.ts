@@ -3,7 +3,7 @@ import { PageIndex } from "../page-objects/PageIndex";
 
 test.describe("Loan Request Amount page tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("https://my.bridgefund.nl/en/nl/request-loan/amount"); // TODO: Fix and use base url
+    await page.goto("/en/nl/request-loan/amount");
   });
 
   test("Should enter a loan amount using the input field", async ({ page }) => {
