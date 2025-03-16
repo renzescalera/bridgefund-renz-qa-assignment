@@ -24,6 +24,15 @@ export class AmountPage {
     return this.page.locator("gr-button.button-primary");
   }
 
+  getPreviousButton() {
+    const isEnUsedAsLanguage = this.page.url().includes("/en/");
+    return this.page
+      .locator(
+        `a[href="/${isEnUsedAsLanguage ? "en" : "nl"}/nl/request-loan/amount"]`
+      )
+      .first();
+  }
+
   private getDropdownIndex(dropdownType: string): number {
     const dropdownMap: Record<string, number> = {
       loanPeriods: 1,

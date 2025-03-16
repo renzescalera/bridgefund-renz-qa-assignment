@@ -25,37 +25,30 @@ test.describe("Loan Request Amount page tests", () => {
   });
 
   test("Should enter a loan amount using the slider", async ({ page }) => {
-    // TODO: Make clean up
+    const pageObject = new PageIndex(page);
 
-    const initialValue = await page
-      .locator('[inputmode="numeric"]')
+    const initialValue = await pageObject
+      .amount()
+      .getAmountField()
       .inputValue();
-    console.log("initial value: ", initialValue);
 
     // Wait for the slider to be visible
     const amountSlider = page.locator('input[type="range"]');
-    await amountSlider.waitFor();
+    await amountSlider.waitFor({ state: "visible" });
 
     // Get slider bounding box
     const boundingBox = await amountSlider.boundingBox();
     if (!boundingBox) {
-      console.error("Slider not found!");
-      return;
+      throw new Error("Slider not found!");
     }
 
     // Extract slider position
     const { x, y, width, height } = boundingBox;
     const sliderY = y + height / 2; // Center of the slider
 
-    console.log("boundingBox", boundingBox);
-
     // Start position (left edge) and move towards right
     const startX = x + 5;
     const endX = x + width - 10; // Move to the right
-
-    // console.log(
-    //   `Dragging slider from (${startX}, ${sliderY}) to (${endX}, ${sliderY})`
-    // );
 
     // Move the mouse to the start position
     await page.mouse.move(startX, sliderY);
@@ -63,14 +56,13 @@ test.describe("Loan Request Amount page tests", () => {
     await page.mouse.move(endX, sliderY, { steps: 10 }); // Drag with steps
     await page.mouse.up(); // Release mouse button
 
-    // Wait for the UI update
-    await page.waitForTimeout(2000);
+    await pageObject.amount().getAmountField().waitFor({ state: "visible" });
 
     // Get updated loan amount from input field
-    const updatedValue = await page
-      .locator('[inputmode="numeric"]')
+    const updatedValue = await pageObject
+      .amount()
+      .getAmountField()
       .inputValue();
-    console.log("Updated loan amount:", updatedValue);
 
     expect(initialValue).not.toBe(updatedValue);
   });
@@ -172,16 +164,14 @@ test.describe("Loan Request Amount page tests", () => {
     };
 
     await pageObject.amount().completeAmountForm(loanRequirementsData);
-    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData); // TODO: to be Reconsider
+    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
 
     // Validate next button to be clickable
     await expect(pageObject.amount().getNextButton()).toBeEnabled();
 
     await pageObject.amount().getNextButton().click();
 
-    await page.waitForResponse(
-      "https://region1.google-analytics.com/g/collect?*"
-    );
+    await page.waitForResponse("**/g/collect?*");
 
     const currentUrl = await page.url();
     expect(currentUrl).toContain("contact");
@@ -204,13 +194,11 @@ test.describe("Loan Request Amount page tests", () => {
     await pageObject.amount().completeAmountForm(loanRequirementsData);
     await pageObject.amount().getNextButton().click();
 
-    await page.waitForResponse(
-      "https://region1.google-analytics.com/g/collect?*"
-    );
+    await page.waitForResponse("**/g/collect?*");
 
     const oldUrl = page.url();
 
-    await page.locator('a[href="/en/nl/request-loan/amount"]').first().click(); // TODO: Fix selector as it could be nl instead of en - Move to page-object
+    await pageObject.amount().getPreviousButton().first().click();
 
     const newUrl = page.url();
     expect(newUrl).toContain("amount");
@@ -237,9 +225,7 @@ test.describe("Loan Request Amount page tests", () => {
 
     await page.reload();
 
-    await page.waitForResponse(
-      "https://region1.google-analytics.com/g/collect?*"
-    );
+    await page.waitForResponse("**/g/collect?*");
 
     await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
   });
