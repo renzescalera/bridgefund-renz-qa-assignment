@@ -92,10 +92,7 @@ export class AmountPage {
   async validateCompletedAmountForm(expectedAmountFormDataObject) {
     const { loanAmount, dropdowns } = expectedAmountFormDataObject;
 
-    const isEnUsedAsLanguage = this.page.url().includes("/en/");
-    const formattedAmount = new Intl.NumberFormat(
-      isEnUsedAsLanguage ? "en-US" : "nl-NL"
-    ).format(loanAmount);
+    const formattedAmount = await this.loanAmountFormatter(loanAmount);
 
     const inputValue = await this.getAmountField().inputValue();
     expect(inputValue).toBe(formattedAmount);
@@ -109,5 +106,14 @@ export class AmountPage {
 
       expect(dropdownOption).toBe(loanData.value);
     }
+  }
+
+  async loanAmountFormatter(loanAmount: number) {
+    const isEnUsedAsLanguage = this.page.url().includes("/en/");
+    const formattedAmount = new Intl.NumberFormat(
+      isEnUsedAsLanguage ? "en-US" : "nl-NL"
+    ).format(loanAmount);
+
+    return formattedAmount;
   }
 }

@@ -8,15 +8,18 @@ test.describe("Loan Request Amount page tests", () => {
 
   test("Should enter a loan amount using the input field", async ({ page }) => {
     const pageObject = new PageIndex(page);
-    // await page.locator('[inputmode="numeric"]').fill("20000");
-    await pageObject.amount().getAmountField().fill("20000");
 
-    // await page.locator("body").click();
+    const loanAmount = 20000;
+    const formattedAmount = await pageObject
+      .amount()
+      .loanAmountFormatter(loanAmount);
+    const stringtifiedAmount = String(formattedAmount);
 
-    await expect(pageObject.amount().getAmountField()).toHaveValue("20000");
+    await pageObject.amount().getAmountField().fill(stringtifiedAmount);
+    await page.locator("body").click();
 
     const inputValue = await pageObject.amount().getAmountField().inputValue();
-    expect(inputValue).toBe("20000");
+    expect(inputValue).toBe(stringtifiedAmount);
 
     await expect(pageObject.amount().getNextButton()).toHaveAttribute(
       "aria-disabled",
@@ -32,33 +35,27 @@ test.describe("Loan Request Amount page tests", () => {
       .getAmountField()
       .inputValue();
 
-    // Wait for the slider to be visible
     const amountSlider = page.locator('input[type="range"]');
     await amountSlider.waitFor({ state: "visible" });
 
-    // Get slider bounding box
     const boundingBox = await amountSlider.boundingBox();
     if (!boundingBox) {
       throw new Error("Slider not found!");
     }
 
-    // Extract slider position
     const { x, y, width, height } = boundingBox;
-    const sliderY = y + height / 2; // Center of the slider
+    const sliderY = y + height / 2;
 
-    // Start position (left edge) and move towards right
     const startX = x + 5;
-    const endX = x + width - 10; // Move to the right
+    const endX = x + width - 10;
 
-    // Move the mouse to the start position
     await page.mouse.move(startX, sliderY);
-    await page.mouse.down(); // Hold mouse button
-    await page.mouse.move(endX, sliderY, { steps: 10 }); // Drag with steps
-    await page.mouse.up(); // Release mouse button
+    await page.mouse.down();
+    await page.mouse.move(endX, sliderY, { steps: 10 });
+    await page.mouse.up();
 
     await pageObject.amount().getAmountField().waitFor({ state: "visible" });
 
-    // Get updated loan amount from input field
     const updatedValue = await pageObject
       .amount()
       .getAmountField()
