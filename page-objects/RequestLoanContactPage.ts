@@ -22,6 +22,6 @@ export class ContactPage {
       hasText: companyName,
     });
 
-    await company.click();
+    await company.first().click();
   }
 }
