@@ -14,6 +14,13 @@ export class TestData {
   }
 
   generateLoanRequirementsData(loanRequirementsDropdownData: any): any {
+    const min = 5000;
+    const max = 250000;
+    const step = 1000;
+
+    const randomAmount =
+      Math.floor(Math.random() * ((max - min) / step + 1)) * step + min;
+
     const dropdownFields = [
       "loanPeriodDropdown",
       "annualTurnoverDropdown",
@@ -22,7 +29,7 @@ export class TestData {
     ];
 
     return {
-      loanAmount: "12000",
+      loanAmount: String(randomAmount),
       dropdowns: dropdownFields.map((field) => ({
         field: loanRequirementsDropdownData[field].field,
         value: this.getRandomOption(loanRequirementsDropdownData[field]),

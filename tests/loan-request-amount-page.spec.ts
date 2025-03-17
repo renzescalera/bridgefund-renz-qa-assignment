@@ -3,24 +3,26 @@ import { PageIndex } from "../page-objects/PageIndex";
 import loanRequirementsDropdownData from "../test-data/loan-requirements-data.json";
 
 test.describe("Loan Request Amount page functional tests", () => {
+  let pageObject;
   test.beforeEach(async ({ page }) => {
+    pageObject = new PageIndex(page);
+
     await page.goto("/en/nl/request-loan/amount");
   });
 
   test("Should enter a loan amount using the input field", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
-    const loanAmount = 20000;
+    const generatedLoanAmount = pageObject
+      .data()
+      .generateLoanRequirementsData(loanRequirementsDropdownData);
     const formattedAmount = await pageObject
       .amount()
-      .loanAmountFormatter(loanAmount);
-    const stringtifiedAmount = String(formattedAmount);
+      .loanAmountFormatter(generatedLoanAmount.loanAmount);
 
-    await pageObject.amount().getAmountField().fill(stringtifiedAmount);
+    await pageObject.amount().getAmountField().fill(formattedAmount);
     await page.locator("body").click();
 
     const inputValue = await pageObject.amount().getAmountField().inputValue();
-    expect(inputValue).toBe(stringtifiedAmount);
+    expect(inputValue).toBe(formattedAmount);
 
     await expect(pageObject.amount().getNextButton()).toHaveAttribute(
       "aria-disabled",
@@ -29,8 +31,6 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should enter a loan amount using the slider", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
     const initialValue = await pageObject
       .amount()
       .getAmountField()
@@ -47,17 +47,26 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should select a loan type from dropdown", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
-    const selectedOption = "Withdraw in installments";
+    const randomIndex = Math.floor(
+      loanRequirementsDropdownData.loanPeriodDropdown.options.length *
+        Math.random()
+    );
+    const selectedOption =
+      loanRequirementsDropdownData.loanPeriodDropdown.options[randomIndex];
 
     await pageObject
       .amount()
-      .selectDropdownOption("loanPeriods", selectedOption);
+      .selectDropdownOption(
+        loanRequirementsDropdownData.loanPeriodDropdown.field,
+        selectedOption
+      );
 
     await pageObject
       .amount()
-      .validateDropdownSelectedOption("loanPeriods", selectedOption);
+      .validateDropdownSelectedOption(
+        loanRequirementsDropdownData.loanPeriodDropdown.field,
+        selectedOption
+      );
 
     await expect(pageObject.amount().getNextButton()).toHaveAttribute(
       "aria-disabled",
@@ -66,19 +75,26 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should select an annual turnover from dropdown", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
-    const dropdownType = "companyRevenue";
-    // const selectedOption = "Less than €25.000";
-    const selectedOption = "€150.000 - €500.000";
-
-    await pageObject
-      .amount()
-      .selectDropdownOption(dropdownType, selectedOption);
+    const randomIndex = Math.floor(
+      loanRequirementsDropdownData.annualTurnoverDropdown.options.length *
+        Math.random()
+    );
+    const selectedOption =
+      loanRequirementsDropdownData.annualTurnoverDropdown.options[randomIndex];
 
     await pageObject
       .amount()
-      .validateDropdownSelectedOption(dropdownType, selectedOption);
+      .selectDropdownOption(
+        loanRequirementsDropdownData.annualTurnoverDropdown.field,
+        selectedOption
+      );
+
+    await pageObject
+      .amount()
+      .validateDropdownSelectedOption(
+        loanRequirementsDropdownData.annualTurnoverDropdown.field,
+        selectedOption
+      );
 
     await expect(pageObject.amount().getNextButton()).toHaveAttribute(
       "aria-disabled",
@@ -87,18 +103,26 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should select when loan is needed from dropdown", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
-    const dropdownType = "loanDeadline";
-    const selectedOption = "No rush";
-
-    await pageObject
-      .amount()
-      .selectDropdownOption(dropdownType, selectedOption);
+    const randomIndex = Math.floor(
+      loanRequirementsDropdownData.loanDeadlineDropdown.options.length *
+        Math.random()
+    );
+    const selectedOption =
+      loanRequirementsDropdownData.loanDeadlineDropdown.options[randomIndex];
 
     await pageObject
       .amount()
-      .validateDropdownSelectedOption(dropdownType, selectedOption);
+      .selectDropdownOption(
+        loanRequirementsDropdownData.loanDeadlineDropdown.field,
+        selectedOption
+      );
+
+    await pageObject
+      .amount()
+      .validateDropdownSelectedOption(
+        loanRequirementsDropdownData.loanDeadlineDropdown.field,
+        selectedOption
+      );
 
     await expect(pageObject.amount().getNextButton()).toHaveAttribute(
       "aria-disabled",
@@ -107,18 +131,26 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should select what plan for loan from dropdown", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
-    const dropdownType = "loanGoal";
-    const selectedOption = "Vehicles";
-
-    await pageObject
-      .amount()
-      .selectDropdownOption(dropdownType, selectedOption);
+    const randomIndex = Math.floor(
+      loanRequirementsDropdownData.loanGoalDropdown.options.length *
+        Math.random()
+    );
+    const selectedOption =
+      loanRequirementsDropdownData.loanGoalDropdown.options[randomIndex];
 
     await pageObject
       .amount()
-      .validateDropdownSelectedOption(dropdownType, selectedOption);
+      .selectDropdownOption(
+        loanRequirementsDropdownData.loanGoalDropdown.field,
+        selectedOption
+      );
+
+    await pageObject
+      .amount()
+      .validateDropdownSelectedOption(
+        loanRequirementsDropdownData.loanGoalDropdown.field,
+        selectedOption
+      );
 
     await expect(pageObject.amount().getNextButton()).toHaveAttribute(
       "aria-disabled",
@@ -129,8 +161,6 @@ test.describe("Loan Request Amount page functional tests", () => {
   test("Should navigate to the next page after filling in the required information", async ({
     page,
   }) => {
-    const pageObject = new PageIndex(page);
-
     const loanRequirementsData = await pageObject
       .data()
       .generateLoanRequirementsData(loanRequirementsDropdownData);
@@ -150,8 +180,6 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should be able to go back to the previous page", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
     const loanRequirementsData = await pageObject
       .data()
       .generateLoanRequirementsData(loanRequirementsDropdownData);
@@ -173,8 +201,6 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should retain informations when page refreshes.", async ({ page }) => {
-    const pageObject = new PageIndex(page);
-
     const loanRequirementsData = await pageObject
       .data()
       .generateLoanRequirementsData(loanRequirementsDropdownData);
@@ -193,6 +219,5 @@ test.describe("Loan Request Amount page functional tests", () => {
   // test.skip("Should adapt to page layout changes across different screen size", async ({
   //   page,
   // }) => {
-  //   const pageObject = new PageIndex(page);
   // });
 });
