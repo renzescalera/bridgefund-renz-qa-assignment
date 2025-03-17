@@ -1,20 +1,20 @@
 import { test, expect } from "@playwright/test";
 import { PageIndex } from "../page-objects/PageIndex";
+import { faker } from "@faker-js/faker";
 
 test.describe("Loan Request Contact page functional tests", () => {
+  let pageObject;
   test.beforeEach(async ({ page }) => {
     await page.goto("/en/nl/request-loan/contact");
+    pageObject = new PageIndex(page);
+
+    const companyKeyword = "Technology"; // Using a keyword to search a company dynamically
+    await pageObject.contact().quickCompanySearch(companyKeyword);
   });
 
   test("Should be able to search for company using KVK and display correct company details", async ({
     page,
   }) => {
-    const pageObject = new PageIndex(page);
-
-    const companyKeyword = "Technology"; // Using a keyword to search a company dynamically
-
-    await pageObject.contact().quickCompanySearch(companyKeyword);
-
     const interceptedApi = await page.waitForResponse(
       "**/company-network-service/v1/company-information?*"
     );
@@ -43,15 +43,10 @@ test.describe("Loan Request Contact page functional tests", () => {
     expect(uiCompanyDetails).toContain(apiCompanyDetails.data.address.city);
   });
 
+  // TODO: Still need to do some clean up
   test("Should select a listed director and first name and last name must be prefilled after selection", async ({
     page,
   }) => {
-    const pageObject = new PageIndex(page);
-
-    const bridgefundCompanyKvk = "70304580";
-
-    await pageObject.contact().quickCompanySearch(bridgefundCompanyKvk);
-
     const interceptedApiCompanyInfo = await page.waitForResponse(
       "**/company-network-service/v1/company-information?*"
     );
@@ -89,77 +84,20 @@ test.describe("Loan Request Contact page functional tests", () => {
     await expect(lastNameValue).toHaveValue(randomDirector.last_name);
   });
 
-  // TODO: This test still need to be optimized
-  test("Should be able to enter loaner personal details: firstName, lastName, email, phoneNumber", async ({
-    page,
-  }) => {
-    const pageObject = new PageIndex(page);
+  const formFields = [
+    { method: "getFirstNameField", value: faker.person.firstName() },
+    { method: "getLastNameField", value: faker.person.lastName() },
+    { method: "getEmailField", value: faker.internet.email() },
+    { method: "getPhoneNumberField", value: "614109257" },
+  ];
 
-    const companyKeyword = "34095964";
-
-    await pageObject.contact().quickCompanySearch(companyKeyword);
-
-    // For input or entering first name
-    const shadowRootFirstName = await page
-      .locator('gr-input[name="userFirstName"]')
-      .evaluateHandle((el) => el.shadowRoot);
-    const firstNameInput = await shadowRootFirstName.$("input#userFirstName");
-
-    await firstNameInput.fill("John");
-
-    // For input or entering last name
-    const shadowRootLastName = await page
-      .locator('gr-input[name="userLastName"]')
-      .evaluateHandle((el) => el.shadowRoot);
-    const lastNameInput = await shadowRootLastName.$("input#userLastName");
-
-    await lastNameInput.fill("Wick");
-
-    // For input or entering email
-    const shadowRootEmail = await page
-      .locator('gr-input[name="userEmail"]')
-      .evaluateHandle((el) => el.shadowRoot);
-    const emailInput = await shadowRootEmail.$("input#userEmail");
-
-    await emailInput.fill("johnwick@gmail.com");
-
-    // For input or entering phone number
-    await page.getByPlaceholder("Phone number").fill("612198201");
-
-    // clicking on body to remove type in
-    await page.locator("body").click();
-
-    // Storing First name
-    const firstNameValue = page
-      .locator('gr-input[name="userFirstName"]')
-      .locator("input")
-      .and(page.getByRole("textbox", { name: "First name" }));
-
-    // Validate the input value that is has the First name
-    await expect(firstNameValue).toHaveValue("John");
-
-    // Storing Last name
-    const lastNameValue = page
-      .locator('gr-input[name="userLastName"]')
-      .locator("input")
-      .and(page.getByRole("textbox", { name: "Last name" }));
-
-    // Validate the input value that is has the Last name
-    await expect(lastNameValue).toHaveValue("Wick");
-
-    // Storing email
-    const emailValue = page
-      .locator('gr-input[name="userEmail"]')
-      .locator("input")
-      .and(page.getByRole("textbox", { name: "Email" }));
-
-    // Validate the input value that is has the Last name
-    await expect(emailValue).toHaveValue("johnwick@gmail.com");
-
-    // Storing phone number
-    const phoneNumberValue = page.getByPlaceholder("Phone number");
-
-    // Validate the input value that is has the Last name
-    await expect(phoneNumberValue).toHaveValue("612198201");
+  formFields.forEach(({ method, value }) => {
+    test(`Should be able to enter loaner personal details: ${method
+      .replace("get", "")
+      .replace("Field", "")}`, async () => {
+      const field = pageObject.contact()[method]();
+      await field.fill(value);
+      await expect(field).toHaveValue(value);
+    });
   });
 });

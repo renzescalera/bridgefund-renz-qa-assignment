@@ -24,4 +24,29 @@ export class ContactPage {
 
     await company.first().click();
   }
+
+  getFirstNameField() {
+    return this.page
+      .locator('gr-input[name="userFirstName"]')
+      .locator("input")
+      .and(this.page.getByRole("textbox", { name: "First name" }));
+  }
+
+  getLastNameField() {
+    return this.page
+      .locator('gr-input[name="userLastName"]')
+      .locator("input")
+      .and(this.page.getByRole("textbox", { name: "Last name" }));
+  }
+
+  getEmailField() {
+    return this.page
+      .locator('gr-input[name="userEmail"]')
+      .locator("input")
+      .and(this.page.getByRole("textbox", { name: "Email" }));
+  }
+
+  getPhoneNumberField() {
+    return this.page.getByPlaceholder("Phone number");
+  }
 }
