@@ -25,6 +25,14 @@ export class ContactPage {
     await company.first().click();
   }
 
+  async selectCompanyDirector(directorName: string) {
+    const companyDirector = this.page.locator(".w-full gr-radio", {
+      hasText: directorName,
+    });
+
+    await companyDirector.click();
+  }
+
   getFirstNameField() {
     return this.page
       .locator('gr-input[name="userFirstName"]')
@@ -48,5 +56,9 @@ export class ContactPage {
 
   getPhoneNumberField() {
     return this.page.getByPlaceholder("Phone number");
+  }
+
+  getNextButton() {
+    return this.page.locator(".button-primary");
   }
 }

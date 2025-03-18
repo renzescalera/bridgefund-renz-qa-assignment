@@ -12,7 +12,7 @@ test.describe("Loan Request Contact page functional tests", () => {
     await pageObject.contact().quickCompanySearch(companyKeyword);
   });
 
-  test("Should be able to search for company using KVK and display correct company details", async ({
+  test("Should search for a company and display correct company details", async ({
     page,
   }) => {
     const interceptedApi = await page.waitForResponse(
@@ -43,7 +43,6 @@ test.describe("Loan Request Contact page functional tests", () => {
     expect(uiCompanyDetails).toContain(apiCompanyDetails.data.address.city);
   });
 
-  // TODO: Still need to do some clean up
   test("Should select a listed director and first name and last name must be prefilled after selection", async ({
     page,
   }) => {
@@ -59,29 +58,17 @@ test.describe("Loan Request Contact page functional tests", () => {
 
     const randomDirector = apiCompanyDetails.data.people[randomIndex];
 
-    const companyDirector = page.locator(".w-full gr-radio", {
-      hasText: randomDirector.full_name,
-    });
+    await pageObject.contact().selectCompanyDirector(randomDirector.full_name);
 
-    await companyDirector.click();
+    // Validate first name has been prefilled
+    await expect(pageObject.contact().getFirstNameField()).toHaveValue(
+      randomDirector.first_name
+    );
 
-    // Storing First name
-    const firstNameValue = page
-      .locator('gr-input[name="userFirstName"]')
-      .locator("input")
-      .and(page.getByRole("textbox", { name: "First name" }));
-
-    // Validate the input value that is has the First name
-    await expect(firstNameValue).toHaveValue(randomDirector.first_name);
-
-    // Storing Last name
-    const lastNameValue = page
-      .locator('gr-input[name="userLastName"]')
-      .locator("input")
-      .and(page.getByRole("textbox", { name: "Last name" }));
-
-    // Validate the input value that is has the Last name
-    await expect(lastNameValue).toHaveValue(randomDirector.last_name);
+    // Validate last name has been prefilled
+    await expect(pageObject.contact().getLastNameField()).toHaveValue(
+      randomDirector.last_name
+    );
   });
 
   const formFields = [
@@ -98,6 +85,47 @@ test.describe("Loan Request Contact page functional tests", () => {
       const field = pageObject.contact()[method]();
       await field.fill(value);
       await expect(field).toHaveValue(value);
+
+      // TODO: Maybe it is good to include the (unchecked) checkboxes as well
+      await expect(pageObject.contact().getNextButton()).toHaveAttribute(
+        "aria-disabled",
+        "true"
+      );
     });
   });
+
+  // TODO: WIP
+  test("Should be able to check email option checkbox", async ({ page }) => {
+    const checkboxEmailOption = page
+      .locator('gr-checkbox[name="emailOptIn"]')
+      .locator('input[type="checkbox"]');
+
+    await page.locator('gr-checkbox[name="emailOptIn"]').click();
+    // await checkbox.check();
+
+    // Verify the checkbox is checked
+    await expect(checkboxEmailOption).toBeChecked();
+  });
+
+  // TODO: WIP
+  test("Should be able to check terms and condition checkbox", async ({
+    page,
+  }) => {
+    const checkboxTermsAndCond = page
+      .locator('gr-checkbox[name="agreeToTermsAndConditions"]')
+      .locator('input[type="checkbox"]');
+
+    await page.locator('gr-checkbox[name="agreeToTermsAndConditions"]').click();
+    // await checkbox.check();
+
+    // Verify the checkbox is checked
+    await expect(checkboxTermsAndCond).toBeChecked();
+  });
+
+  // TODO: WIP
+  // TODO: Also apply here the Visual Regression Testing – Capture snapshots for UI comparison.
+  // test.skip("Should adapt to page layout changes across different screen size", async ({
+  //   page,
+  // }) => {
+  // });
 });
