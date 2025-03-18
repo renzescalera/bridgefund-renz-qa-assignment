@@ -18,10 +18,8 @@ test.describe("Loan Request Contact page functional tests", () => {
     const interceptedApi = await page.waitForResponse(
       "**/company-network-service/v1/company-information?*"
     );
-
     const apiCompanyDetails = await interceptedApi.json();
     const uiCompanyDetails = await page.locator(".mt-5").first().textContent();
-
     const uiCompanyName = await page
       .locator(".mt-4 span")
       .first()
@@ -49,15 +47,12 @@ test.describe("Loan Request Contact page functional tests", () => {
     const interceptedApiCompanyInfo = await page.waitForResponse(
       "**/company-network-service/v1/company-information?*"
     );
-
     const apiCompanyDetails = await interceptedApiCompanyInfo.json();
-
     const randomIndex = Math.floor(
       Math.random() * apiCompanyDetails.data.people.length
     );
 
     const randomDirector = apiCompanyDetails.data.people[randomIndex];
-
     await pageObject.contact().selectCompanyDirector(randomDirector.full_name);
 
     // Validate first name has been prefilled
@@ -71,22 +66,28 @@ test.describe("Loan Request Contact page functional tests", () => {
     );
   });
 
-  const formFields = [
-    { method: "getFirstNameField", value: faker.person.firstName() },
-    { method: "getLastNameField", value: faker.person.lastName() },
-    { method: "getEmailField", value: faker.internet.email() },
+  const fakeFirstName = faker.person.firstName();
+  const fakeLastName = faker.person.lastName();
+  const fakeEmail = `${fakeFirstName}.${fakeLastName}@gmail.com`;
+
+  const contactDetailsFields = [
+    { method: "getFirstNameField", value: fakeFirstName },
+    { method: "getLastNameField", value: fakeLastName },
+    { method: "getEmailField", value: fakeEmail },
     { method: "getPhoneNumberField", value: "614109257" },
   ];
 
-  formFields.forEach(({ method, value }) => {
+  contactDetailsFields.forEach(({ method, value }) => {
     test(`Should be able to enter loaner personal details: ${method
       .replace("get", "")
       .replace("Field", "")}`, async () => {
       const field = pageObject.contact()[method]();
+
       await field.fill(value);
+
       await expect(field).toHaveValue(value);
 
-      // TODO: Maybe it is good to include the (unchecked) checkboxes as well
+      // Validating that Next button is disabled as the form is not completed`
       await expect(pageObject.contact().getNextButton()).toHaveAttribute(
         "aria-disabled",
         "true"
@@ -94,32 +95,35 @@ test.describe("Loan Request Contact page functional tests", () => {
     });
   });
 
-  // TODO: WIP
-  test("Should be able to check email option checkbox", async ({ page }) => {
-    const checkboxEmailOption = page
-      .locator('gr-checkbox[name="emailOptIn"]')
-      .locator('input[type="checkbox"]');
+  const formCheckboxes = [
+    { method: "getEmailCheckbox", label: "Email option" },
+    { method: "getTermsAndCondCheckbox", label: "Terms and Condition" },
+  ];
 
-    await page.locator('gr-checkbox[name="emailOptIn"]').click();
-    // await checkbox.check();
+  formCheckboxes.forEach(({ method, label }) => {
+    test(`Should be able to check ${label} checkbox`, async () => {
+      const checkbox = pageObject.contact()[method]();
 
-    // Verify the checkbox is checked
-    await expect(checkboxEmailOption).toBeChecked();
+      await checkbox.check({ force: true }); // Using force to ensure interaction
+
+      await expect(checkbox).toBeChecked();
+    });
   });
 
-  // TODO: WIP
-  test("Should be able to check terms and condition checkbox", async ({
-    page,
-  }) => {
-    const checkboxTermsAndCond = page
-      .locator('gr-checkbox[name="agreeToTermsAndConditions"]')
-      .locator('input[type="checkbox"]');
+  test("Should Next button is enabled when form is completed", async () => {
+    for (const { method, value } of contactDetailsFields) {
+      const field = pageObject.contact()[method]();
 
-    await page.locator('gr-checkbox[name="agreeToTermsAndConditions"]').click();
-    // await checkbox.check();
+      await field.fill(value);
+    }
 
-    // Verify the checkbox is checked
-    await expect(checkboxTermsAndCond).toBeChecked();
+    for (const { method } of formCheckboxes) {
+      const checkbox = pageObject.contact()[method]();
+
+      await checkbox.check({ force: true }); // Using force to ensure interaction
+    }
+
+    await expect(pageObject.contact().getNextButton()).toBeEnabled();
   });
 
   // TODO: WIP

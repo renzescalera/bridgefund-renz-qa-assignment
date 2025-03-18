@@ -58,6 +58,18 @@ export class ContactPage {
     return this.page.getByPlaceholder("Phone number");
   }
 
+  getEmailCheckbox() {
+    return this.page
+      .locator('gr-checkbox[name="emailOptIn"]')
+      .locator('input[type="checkbox"]');
+  }
+
+  getTermsAndCondCheckbox() {
+    return this.page
+      .locator('gr-checkbox[name="agreeToTermsAndConditions"]')
+      .locator('input[type="checkbox"]');
+  }
+
   getNextButton() {
     return this.page.locator(".button-primary");
   }
