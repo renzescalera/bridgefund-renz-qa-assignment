@@ -8,8 +8,8 @@ test.describe("Responsive Layout and Visual Regression - Amount page and Contact
   ];
 
   const pages = [
-    { name: "Amount-page", url: "/en/nl/request-loan/amount" },
-    { name: "Contact-page", url: "/en/nl/request-loan/contact" },
+    { name: "amount-page", url: "/en/nl/request-loan/amount" },
+    { name: "contact-page", url: "/en/nl/request-loan/contact" },
   ];
 
   for (const pageInfo of pages) {
