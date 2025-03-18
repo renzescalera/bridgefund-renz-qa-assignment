@@ -3,22 +3,25 @@ import { PageIndex } from "../page-objects/PageIndex";
 import { faker } from "@faker-js/faker";
 
 test.describe("Loan Request Contact page functional tests", () => {
-  let pageObject;
+  let pageObject: any;
+  let interceptedApiCompanyInfo: any;
+
   test.beforeEach(async ({ page }) => {
     await page.goto("/en/nl/request-loan/contact");
     pageObject = new PageIndex(page);
 
     const companyKeyword = "Technology"; // Using a keyword to search a company dynamically
     await pageObject.contact().quickCompanySearch(companyKeyword);
+
+    interceptedApiCompanyInfo = await page.waitForResponse(
+      "**/company-network-service/v1/company-information?*"
+    );
   });
 
   test("Should search for a company and display correct company details", async ({
     page,
   }) => {
-    const interceptedApi = await page.waitForResponse(
-      "**/company-network-service/v1/company-information?*"
-    );
-    const apiCompanyDetails = await interceptedApi.json();
+    const apiCompanyDetails = await interceptedApiCompanyInfo.json();
     const uiCompanyDetails = await page.locator(".mt-5").first().textContent();
     const uiCompanyName = await page
       .locator(".mt-4 span")
@@ -41,12 +44,7 @@ test.describe("Loan Request Contact page functional tests", () => {
     expect(uiCompanyDetails).toContain(apiCompanyDetails.data.address.city);
   });
 
-  test("Should select a listed director and first name and last name must be prefilled after selection", async ({
-    page,
-  }) => {
-    const interceptedApiCompanyInfo = await page.waitForResponse(
-      "**/company-network-service/v1/company-information?*"
-    );
+  test("Should select a listed director and first name and last name must be prefilled after selection", async () => {
     const apiCompanyDetails = await interceptedApiCompanyInfo.json();
     const randomIndex = Math.floor(
       Math.random() * apiCompanyDetails.data.people.length
@@ -126,10 +124,13 @@ test.describe("Loan Request Contact page functional tests", () => {
     await expect(pageObject.contact().getNextButton()).toBeEnabled();
   });
 
-  // TODO: WIP
-  // TODO: Also apply here the Visual Regression Testing – Capture snapshots for UI comparison.
-  // test.skip("Should adapt to page layout changes across different screen size", async ({
-  //   page,
-  // }) => {
-  // });
+  test("Should be able to go back to the previous page", async ({ page }) => {
+    const oldUrl = page.url();
+
+    await pageObject.amount().getPreviousButton().first().click();
+
+    const newUrl = page.url();
+    expect(newUrl).toContain("amount");
+    expect(oldUrl).not.toBe(newUrl);
+  });
 });

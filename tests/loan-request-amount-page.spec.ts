@@ -30,7 +30,7 @@ test.describe("Loan Request Amount page functional tests", () => {
     );
   });
 
-  test("Should enter a loan amount using the slider", async ({ page }) => {
+  test("Should enter a loan amount using the slider", async () => {
     const initialValue = await pageObject
       .amount()
       .getAmountField()
@@ -46,7 +46,7 @@ test.describe("Loan Request Amount page functional tests", () => {
     expect(initialValue).not.toBe(updatedValue);
   });
 
-  test("Should select a loan type from dropdown", async ({ page }) => {
+  test("Should select a loan type from dropdown", async () => {
     const randomIndex = Math.floor(
       loanRequirementsDropdownData.loanPeriodDropdown.options.length *
         Math.random()
@@ -74,7 +74,7 @@ test.describe("Loan Request Amount page functional tests", () => {
     );
   });
 
-  test("Should select an annual turnover from dropdown", async ({ page }) => {
+  test("Should select an annual turnover from dropdown", async () => {
     const randomIndex = Math.floor(
       loanRequirementsDropdownData.annualTurnoverDropdown.options.length *
         Math.random()
@@ -102,7 +102,7 @@ test.describe("Loan Request Amount page functional tests", () => {
     );
   });
 
-  test("Should select when loan is needed from dropdown", async ({ page }) => {
+  test("Should select when loan is needed from dropdown", async () => {
     const randomIndex = Math.floor(
       loanRequirementsDropdownData.loanDeadlineDropdown.options.length *
         Math.random()
@@ -130,7 +130,7 @@ test.describe("Loan Request Amount page functional tests", () => {
     );
   });
 
-  test("Should select what plan for loan from dropdown", async ({ page }) => {
+  test("Should select what plan for loan from dropdown", async () => {
     const randomIndex = Math.floor(
       loanRequirementsDropdownData.loanGoalDropdown.options.length *
         Math.random()
@@ -213,11 +213,4 @@ test.describe("Loan Request Amount page functional tests", () => {
 
     await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
   });
-
-  // TODO: WIP
-  // TODO: Also apply here the Visual Regression Testing – Capture snapshots for UI comparison.
-  // test.skip("Should adapt to page layout changes across different screen size", async ({
-  //   page,
-  // }) => {
-  // });
 });
