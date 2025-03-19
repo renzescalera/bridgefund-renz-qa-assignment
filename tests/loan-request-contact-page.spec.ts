@@ -10,7 +10,18 @@ test.describe("Loan Request Contact page functional tests", () => {
     await page.goto("/en/nl/request-loan/contact");
     pageObject = new PageIndex(page);
 
-    const companyKeyword = "Technology"; // Using a keyword to search a company dynamically
+    // Using a keyword to search a company dynamically
+    const keywordArr = [
+      "bank",
+      "technology",
+      "company",
+      "finance",
+      "consulting",
+    ];
+
+    const randomIndex = Math.floor(keywordArr.length * Math.random());
+    const companyKeyword = keywordArr[randomIndex];
+
     await pageObject.contact().quickCompanySearch(companyKeyword);
 
     interceptedApiCompanyInfo = await page.waitForResponse(
