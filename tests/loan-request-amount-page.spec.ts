@@ -3,17 +3,24 @@ import { PageIndex } from "../page-objects/PageIndex";
 import loanRequirementsDropdownData from "../test-data/loan-requirements-data.json";
 
 test.describe("Loan Request Amount page functional tests", () => {
-  let pageObject;
+  let pageObject: any;
+  let loanRequirementsData: any;
+
   test.beforeEach(async ({ page }) => {
     pageObject = new PageIndex(page);
 
     await page.goto("/en/nl/request-loan/amount");
+
+    loanRequirementsData = await pageObject
+      .data()
+      .generateLoanRequirementsData(loanRequirementsDropdownData);
   });
 
   test("Should enter a loan amount using the input field", async ({ page }) => {
     const generatedLoanAmount = pageObject
       .data()
       .generateLoanRequirementsData(loanRequirementsDropdownData);
+
     const formattedAmount = await pageObject
       .amount()
       .loanAmountFormatter(generatedLoanAmount.loanAmount);
@@ -161,10 +168,6 @@ test.describe("Loan Request Amount page functional tests", () => {
   test("Should navigate to the next page after filling in the required information", async ({
     page,
   }) => {
-    const loanRequirementsData = await pageObject
-      .data()
-      .generateLoanRequirementsData(loanRequirementsDropdownData);
-
     await pageObject.amount().completeAmountForm(loanRequirementsData);
     await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
 
@@ -176,14 +179,12 @@ test.describe("Loan Request Amount page functional tests", () => {
     await page.waitForResponse("**/g/collect?*");
 
     const currentUrl = await page.url();
+
+    // Validate that it landed in contact page
     expect(currentUrl).toContain("contact");
   });
 
   test("Should be able to go back to the previous page", async ({ page }) => {
-    const loanRequirementsData = await pageObject
-      .data()
-      .generateLoanRequirementsData(loanRequirementsDropdownData);
-
     await pageObject.amount().completeAmountForm(loanRequirementsData);
     await pageObject.amount().getNextButton().click();
 
@@ -201,16 +202,42 @@ test.describe("Loan Request Amount page functional tests", () => {
   });
 
   test("Should retain informations when page refreshes.", async ({ page }) => {
-    const loanRequirementsData = await pageObject
-      .data()
-      .generateLoanRequirementsData(loanRequirementsDropdownData);
-
     await pageObject.amount().completeAmountForm(loanRequirementsData);
 
     await page.reload();
+    await page.waitForResponse("**/g/collect?*");
+
+    // Validate loan details are retained after page reload
+    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
+  });
+
+  test("Should be able to view loan details in contact page", async ({
+    page,
+  }) => {
+    await pageObject.amount().completeAmountForm(loanRequirementsData);
+    await pageObject.amount().getNextButton().click();
 
     await page.waitForResponse("**/g/collect?*");
 
-    await pageObject.amount().validateCompletedAmountForm(loanRequirementsData);
+    const amountLoan = await page.locator(".grid .font-bold").textContent();
+    const actualLoanAmount = amountLoan.replace(/[^\d,]/g, "").trim();
+
+    const formattedAmount = await pageObject
+      .amount()
+      .loanAmountFormatter(loanRequirementsData.loanAmount);
+    const expectedLoanAmount = await formattedAmount.trim();
+
+    // Validate Loan Amount in contact page
+    expect(actualLoanAmount).toBe(expectedLoanAmount);
+
+    const expectedLoanGoal = loanRequirementsData.dropdowns[3].value;
+    const loanGoal = await page
+      .locator(".grid .col-span-1:nth-child(2)")
+      .last()
+      .textContent();
+    const actualLoanGoal = loanGoal.trim();
+
+    // Validate Loan Goal in contact page
+    expect(expectedLoanGoal).toBe(actualLoanGoal);
   });
 });
