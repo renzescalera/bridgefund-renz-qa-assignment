@@ -11,6 +11,7 @@ export default defineConfig({
   use: {
     baseURL: "https://my.bridgefund.nl",
     trace: "on-first-retry",
+    video: "retain-on-failure",
   },
 
   projects: [
