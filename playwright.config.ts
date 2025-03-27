@@ -11,12 +11,21 @@ export default defineConfig({
   use: {
     baseURL: "https://my.bridgefund.nl",
     trace: "on-first-retry",
+    video: "retain-on-failure",
   },
 
   projects: [
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "mobile",
+      testMatch: "mobile-loan-request-amount-page.spec.ts",
+      use: {
+        ...devices["iPhone 13 Pro Max"],
+        browserName: "chromium",
+      },
     },
   ],
 });
